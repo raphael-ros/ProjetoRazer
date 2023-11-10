@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:projetorazer/produtos.dart';
 import 'classCliente.dart';
-import '';
+import 'package:projetorazer/widgets/drawer.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,19 +32,18 @@ class ClientesScreen extends StatefulWidget {
 class _ClientesScreenState extends State<ClientesScreen> {
   List<Cliente> clientes = []; // Lista de clientes
 
-  
   void trocaTela() {
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => ProdutosScreen()));
   }
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Lista de Clientes'),
       ),
+      drawer: AppDrawer(), // Adicionando o Drawer aqui
       body: Column(
         children: [
           ElevatedButton(
