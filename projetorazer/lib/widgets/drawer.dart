@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:projetorazer/screens/produtosScreen.dart';
+import 'package:projetorazer/screens/clientesScreen.dart';
+import 'package:projetorazer/screens/produtosScreen.dart';
+import 'package:projetorazer/screens/vendasScreen.dart';
 
 class AppDrawer extends StatelessWidget {
   Widget _createHeader() {
@@ -40,6 +44,8 @@ class AppDrawer extends StatelessWidget {
             text: 'Página Inicial',
             onTap: () {
               // Implemente a navegação para a página inicial aqui.
+              Navigator.pop(context); // Fecha o Drawer
+              // Adicione aqui a lógica para a página inicial, se necessário.
             },
           ),
           _createDrawerItem(
@@ -47,13 +53,22 @@ class AppDrawer extends StatelessWidget {
             text: 'Clientes',
             onTap: () {
               // Implemente a navegação para a tela de clientes aqui.
+              Navigator.pop(context); // Fecha o Drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ClientesScreen()),
+              );
             },
           ),
           _createDrawerItem(
             icon: Icons.shopping_cart,
             text: 'Produtos',
             onTap: () {
-              // Implemente a navegação para a tela de produtos aqui.
+              Navigator.pop(context); // Fecha o Drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProdutosScreen()),
+              );
             },
           ),
           _createDrawerItem(
@@ -61,6 +76,11 @@ class AppDrawer extends StatelessWidget {
             text: 'Vendas',
             onTap: () {
               // Implemente a navegação para a tela de vendas aqui.
+              Navigator.pop(context); // Fecha o Drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => VendasScreen()),
+              );
             },
           ),
           // Adicione mais itens de menu conforme necessário.

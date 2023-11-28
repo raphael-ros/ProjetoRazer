@@ -1,17 +1,6 @@
 import 'package:flutter/material.dart';
-import 'classProduto.dart';
-
-class CadastroProduto extends StatelessWidget {
-  
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Lista de Produtos',
-      home: const ProdutosScreen(),
-    );
-  }
-}
+import '../models/classProduto.dart';
+import '../models/apiService.dart'; // Import ApiService
 
 class ProdutosScreen extends StatefulWidget {
   const ProdutosScreen({Key? key});
@@ -22,6 +11,25 @@ class ProdutosScreen extends StatefulWidget {
 
 class _ProdutosScreenState extends State<ProdutosScreen> {
   List<Produto> produtos = [];
+  final ApiService apiService = ApiService('URL_DA_SUA_API');
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarProdutos();
+  }
+
+  Future<void> _carregarProdutos() async {
+    try {
+      final produtos = await apiService.fetchProdutos();
+      setState(() {
+        this.produtos = produtos;
+      });
+    } catch (e) {
+      // Handle error
+      print('Erro ao carregar produtos: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +45,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
             title: Text(produto.descricao),
             trailing: IconButton(
               icon: Icon(Icons.delete),
-              onPressed: () {
-                setState(() {
-                  produtos.removeAt(index);
-                });
-              },
+              onPressed: () => _excluirProduto(produto.id),
             ),
           );
         },
@@ -55,7 +59,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
     );
   }
 
-  void _mostrarDialogoIncluirProduto(BuildContext context) {
+  Future<void> _mostrarDialogoIncluirProduto(BuildContext context) async {
     final TextEditingController descricaoController = TextEditingController();
 
     showDialog(
@@ -81,21 +85,27 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
             ),
             TextButton(
               child: Text('Salvar'),
-              onPressed: () {
+              onPressed: () async {
                 final descricao = descricaoController.text;
 
                 if (descricao.isNotEmpty) {
-                  final novoProduto = Produto(
-                    descricao: descricao,
-                  );
-                  setState(() {
-                    produtos.add(novoProduto);
-                  });
-                  Navigator.of(context).pop();
+                  try {
+                    final novoProduto = Produto(
+                      id: DateTime.now().millisecondsSinceEpoch,
+                      descricao: descricao,
+                    );
+                    await apiService.criarProduto(novoProduto);
+                    _carregarProdutos(); // Atualiza a lista após a inclusão
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    // Handle error
+                    print('Erro ao criar produto: $e');
+                  }
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Por favor, preencha a descrição do produto.'),
+                      content:
+                          Text('Por favor, preencha a descrição do produto.'),
                     ),
                   );
                 }
@@ -105,5 +115,15 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
         );
       },
     );
+  }
+
+  Future<void> _excluirProduto(int id) async {
+    try {
+      await apiService.excluirProduto(id);
+      _carregarProdutos(); // Atualiza a lista após a exclusão
+    } catch (e) {
+      // Handle error
+      print('Erro ao excluir produto: $e');
+    }
   }
 }

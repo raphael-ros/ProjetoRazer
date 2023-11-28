@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:projetorazer/produtos.dart';
-import 'classCliente.dart';
+
+import 'models/classCliente.dart';
 import 'package:projetorazer/widgets/drawer.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:projetorazer/screens/produtosScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,154 +18,110 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: appTitle,
-      home: const ClientesScreen(),
+      home: const DashboardScreen(),
     );
   }
 }
 
-class ClientesScreen extends StatefulWidget {
-  const ClientesScreen({Key? key});
-
-  @override
-  _ClientesScreenState createState() => _ClientesScreenState();
-}
-
-class _ClientesScreenState extends State<ClientesScreen> {
-  List<Cliente> clientes = []; // Lista de clientes
-
-  void trocaTela() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => ProdutosScreen()));
-  }
+class DashboardScreen extends StatelessWidget {
+  const DashboardScreen({Key? key});
 
   @override
   Widget build(BuildContext context) {
+    // Valores fictícios
+    int totalClientes = 150;
+    int totalVendas = 300;
+    int totalProdutos = 75;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lista de Clientes'),
+        title: Text('Dashboard'),
       ),
-      drawer: AppDrawer(), // Adicionando o Drawer aqui
+      drawer: AppDrawer(),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ElevatedButton(
-            onPressed: trocaTela,
-            child: const Text('Lista de Produtos'),
+          DashboardCard(
+            title: 'Clientes',
+            description: 'Total de clientes cadastrados',
+            count: totalClientes,
+            onPressed: () {
+              // Implemente a navegação para a tela de clientes aqui.
+            },
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: clientes.length,
-              itemBuilder: (context, index) {
-                final cliente = clientes[index];
-                return ListTile(
-                  title: Text('${cliente.nome} ${cliente.sobrenome}'),
-                  subtitle: Text('CPF: ${cliente.cpf}'),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () {
-                      // Verifique se o cliente não possui pedidos antes de excluí-lo
-                      if (podeExcluirCliente(cliente)) {
-                        setState(() {
-                          clientes.removeAt(index);
-                        });
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                'Este cliente possui pedidos e não pode ser excluído.'),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                );
-              },
-            ),
+          DashboardCard(
+            title: 'Vendas',
+            description: 'Total de vendas realizadas',
+            count: totalVendas,
+            onPressed: () {
+              // Implemente a navegação para a tela de vendas aqui.
+            },
+          ),
+          DashboardCard(
+            title: 'Produtos',
+            description: 'Total de produtos disponíveis',
+            count: totalProdutos,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProdutosScreen()),
+              );
+            },
+          ),
+          // Adicionando um gráfico de barras
+          Padding(
+            padding: const EdgeInsets.all(16.0),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _mostrarDialogoIncluirCliente(context);
-        },
-        child: Icon(Icons.add),
-      ),
     );
   }
+}
 
-  bool podeExcluirCliente(Cliente cliente) {
-    // Implemente a lógica para verificar se o cliente possui pedidos
-    // Se tiver pedidos, retorne false; caso contrário, retorne true.
-    return true; // Modifique de acordo com a sua lógica real.
-  }
+class DashboardCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final int count;
+  final VoidCallback onPressed;
 
-  void _mostrarDialogoIncluirCliente(BuildContext context) {
-    final TextEditingController nomeController = TextEditingController();
-    final TextEditingController sobrenomeController = TextEditingController();
-    final cpfController = MaskTextInputFormatter(
-      mask: '###.###.###-##',
-      filter: {"#": RegExp(r'[0-9]')},
-    );
+  const DashboardCard({
+    required this.title,
+    required this.description,
+    required this.count,
+    required this.onPressed,
+  });
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Incluir Cliente'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: nomeController,
-                decoration: InputDecoration(labelText: 'Nome'),
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 3,
+      margin: EdgeInsets.all(16),
+      child: InkWell(
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              TextField(
-                controller: sobrenomeController,
-                decoration: InputDecoration(labelText: 'Sobrenome'),
+              SizedBox(height: 8),
+              Text(
+                description,
+                style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
-              TextField(
-                controller:
-                    TextEditingController(text: cpfController.getMaskedText()),
-                inputFormatters: [cpfController],
-                decoration: InputDecoration(labelText: 'CPF'),
+              SizedBox(height: 8),
+              Text(
+                'Total: $count',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
             ],
           ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Salvar'),
-              onPressed: () {
-                final nome = nomeController.text;
-                final sobrenome = sobrenomeController.text;
-                final cpf = cpfController.getUnmaskedText();
-
-                if (nome.isNotEmpty && sobrenome.isNotEmpty && cpf.isNotEmpty) {
-                  final novoCliente = Cliente(
-                    nome: nome,
-                    sobrenome: sobrenome,
-                    cpf: cpf,
-                  );
-                  setState(() {
-                    clientes.add(novoCliente);
-                  });
-                  Navigator.of(context).pop();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Por favor, preencha todos os campos.'),
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
-        );
-      },
+        ),
+      ),
     );
   }
 }
