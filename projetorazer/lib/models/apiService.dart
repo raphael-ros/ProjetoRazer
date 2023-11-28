@@ -4,6 +4,7 @@ import 'dart:convert';
 
 class ApiService {
   final String baseUrl;
+  final apiService = ApiService('http://localhost:3000');
 
   ApiService(this.baseUrl);
 

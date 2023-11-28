@@ -1,15 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../models/classCliente.dart';
-
-class CadastroCliente extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Lista de Clientes',
-      home: const ClientesScreen(),
-    );
-  }
-}
+import 'package:http/http.dart' as http;
+import 'package:projetorazer/models/classCliente.dart';
 
 class ClientesScreen extends StatefulWidget {
   const ClientesScreen({Key? key});
@@ -30,41 +22,52 @@ class _ClientesScreenState extends State<ClientesScreen> {
   bool isEditing = false;
   int editingIndex = -1;
 
+  final String baseUrl =
+      'http://localhost:3000'; // Ajuste a URL conforme necessário
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarClientes();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Lista de Clientes'),
       ),
-      body: ListView.builder(
-        itemCount: clientes.length,
-        itemBuilder: (context, index) {
-          final cliente = clientes[index];
-          return ListTile(
-            title: Text('${cliente.nome} ${cliente.sobrenome}'),
-            subtitle: Text('CPF: ${cliente.cpf}'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () {
-                    _mostrarDialogoEditarCliente(context, index);
+      body: clientes == null
+          ? Center(child: CircularProgressIndicator())
+          : clientes.isEmpty
+              ? Center(child: Text('Nenhum cliente encontrado.'))
+              : ListView.builder(
+                  itemCount: clientes.length,
+                  itemBuilder: (context, index) {
+                    final cliente = clientes[index];
+                    return ListTile(
+                      title: Text('${cliente.nome} ${cliente.sobrenome}'),
+                      subtitle: Text('CPF: ${cliente.cpf}'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () {
+                              _mostrarDialogoEditarCliente(context, index);
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              _excluirCliente(cliente.id);
+                            },
+                          ),
+                        ],
+                      ),
+                    );
                   },
                 ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () {
-                    setState(() {
-                      clientes.removeAt(index);
-                    });
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _mostrarDialogoIncluirEditarCliente(context);
@@ -74,97 +77,79 @@ class _ClientesScreenState extends State<ClientesScreen> {
     );
   }
 
-  void _mostrarDialogoIncluirEditarCliente(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(isEditing ? 'Editar Cliente' : 'Incluir Cliente'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: nomeController,
-                decoration: InputDecoration(labelText: 'Nome'),
-              ),
-              TextField(
-                controller: sobrenomeController,
-                decoration: InputDecoration(labelText: 'Sobrenome'),
-              ),
-              TextField(
-                controller: cpfController,
-                decoration: InputDecoration(labelText: 'CPF'),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                _limparCampos();
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text(isEditing ? 'Salvar Alterações' : 'Salvar'),
-              onPressed: () {
-                _incluirEditarCliente();
-                _limparCampos();
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  Future<List<Cliente>> _listarClientes() async {
+    final response = await http.get(Uri.parse('$baseUrl/clientes'));
 
-  void _mostrarDialogoEditarCliente(BuildContext context, int index) {
-    // Preencha os campos de edição com as informações do cliente selecionado
-    nomeController.text = clientes[index].nome;
-    sobrenomeController.text = clientes[index].sobrenome;
-    cpfController.text = clientes[index].cpf;
-
-    // Atualize as variáveis de controle
-    isEditing = true;
-    editingIndex = index;
-
-    // Abra o diálogo de inclusão/editar
-    _mostrarDialogoIncluirEditarCliente(context);
-  }
-
-  void _incluirEditarCliente() {
-    final nome = nomeController.text;
-    final sobrenome = sobrenomeController.text;
-    final cpf = cpfController.text;
-
-    if (nome.isNotEmpty && sobrenome.isNotEmpty && cpf.isNotEmpty) {
-      final novoCliente = Cliente(
-        nome: nome,
-        sobrenome: sobrenome,
-        cpf: cpf,
-      );
-
-      if (isEditing) {
-        // Se estamos editando, substitua o cliente existente
-        setState(() {
-          clientes[editingIndex] = novoCliente;
-        });
-      } else {
-        // Se estamos adicionando, inclua o novo cliente
-        setState(() {
-          clientes.add(novoCliente);
-        });
-      }
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body)['clientes'];
+      return data.map((json) => Cliente.fromJson(json)).toList();
+    } else {
+      throw Exception('Erro ao carregar clientes da API');
     }
   }
 
+  Future<void> _incluirCliente(Cliente novoCliente) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/incluirCliente'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(novoCliente.toJson()),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Erro ao criar cliente na API');
+    }
+  }
+
+  Future<void> _editarCliente(int id, Cliente clienteEditado) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/atualizarCliente/$id'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(clienteEditado.toJson()),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Erro ao editar cliente na API');
+    }
+  }
+
+  Future<Cliente> _getClienteById(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/clientes/$id'));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      return Cliente.fromJson(data);
+    } else {
+      throw Exception('Erro ao carregar cliente da API');
+    }
+  }
+
+  Future<void> _excluirCliente(int id) async {
+    final response =
+        await http.delete(Uri.parse('$baseUrl/excluirCliente/$id'));
+
+    if (response.statusCode != 204) {
+      throw Exception('Erro ao excluir cliente na API');
+    }
+  }
+
+  void _mostrarDialogoIncluirEditarCliente(BuildContext context) {}
+
+  void _mostrarDialogoEditarCliente(BuildContext context, int index) {}
+
+  void _incluirEditarCliente() async {}
+
   void _limparCampos() {
-    // Limpe os campos de edição e redefina as variáveis de controle
-    nomeController.clear();
-    sobrenomeController.clear();
-    cpfController.clear();
-    isEditing = false;
-    editingIndex = -1;
+    // Restante do código...
+  }
+
+  void _carregarClientes() async {
+    try {
+      final listaClientes = await _listarClientes();
+      setState(() {
+        clientes = listaClientes;
+      });
+    } catch (e) {
+      print('Erro ao carregar clientes: $e');
+    }
   }
 }
