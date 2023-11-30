@@ -124,22 +124,146 @@ class _ClientesScreenState extends State<ClientesScreen> {
   }
 
   Future<void> _excluirCliente(int id) async {
-    final response =
-        await http.delete(Uri.parse('$baseUrl/excluirCliente/$id'));
+    try {
+      await http.delete(Uri.parse('$baseUrl/excluirCliente/$id'));
 
-    if (response.statusCode != 204) {
-      throw Exception('Erro ao excluir cliente na API');
+      // Se a exclusão for bem-sucedida, mostrar mensagem de confirmação
+      _mostrarSnackBar('Cliente excluído com sucesso');
+
+      // Recarregar lista de clientes após a exclusão
+      _carregarClientes();
+    } catch (e) {
+      print('Erro ao excluir cliente: $e');
+      // Tratar erro, se necessário
     }
   }
 
-  void _mostrarDialogoIncluirEditarCliente(BuildContext context) {}
+//Tentei exibir uma alert para confirmar a exclusão, mas não funcionou
+  // Future<void> _confirmarExclusaoCliente(int id) async {
+  //   return showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text('Confirmação'),
+  //         content: Text('Tem certeza que deseja excluir esse cliente?'),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop(); // Fechar o diálogo de confirmação
+  //             },
+  //             child: Text('Cancelar'),
+  //           ),
+  //           TextButton(
+  //             onPressed: () async {
+  //               await _excluirCliente(id);
+  //               Navigator.of(context).pop(); // Fechar o diálogo de confirmação
+  //             },
+  //             child: Text('Confirmar'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
-  void _mostrarDialogoEditarCliente(BuildContext context, int index) {}
+  void _mostrarDialogoIncluirEditarCliente(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Incluir Cliente'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: nomeController,
+                  decoration: InputDecoration(labelText: 'Nome'),
+                ),
+                TextField(
+                  controller: sobrenomeController,
+                  decoration: InputDecoration(labelText: 'Sobrenome'),
+                ),
+                TextField(
+                  controller: cpfController,
+                  decoration: InputDecoration(labelText: 'CPF'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fechar o diálogo
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Chamar a função para incluir o cliente
+                _incluirEditarCliente();
+                Navigator.of(context).pop(); // Fechar o diálogo
+              },
+              child: Text('Salvar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-  void _incluirEditarCliente() async {}
+  void _mostrarDialogoEditarCliente(BuildContext context, int index) {
+    // Preencher os controladores com os detalhes do cliente selecionado
+    nomeController.text = clientes[index].nome;
+    sobrenomeController.text = clientes[index].sobrenome;
+    cpfController.text = clientes[index].cpf;
+
+    // Configurar variáveis de edição
+    isEditing = true;
+    editingIndex = index;
+
+    // Mostrar o diálogo de inclusão/editação
+    _mostrarDialogoIncluirEditarCliente(context);
+  }
+
+  void _incluirEditarCliente() async {
+    // Criar um novo cliente com os dados dos controladores
+    Cliente novoCliente = Cliente(
+      id: isEditing
+          ? clientes[editingIndex].id
+          : 0, // Se estiver editando, use o ID existente, caso contrário, use 0 ou um valor padrão
+      nome: nomeController.text,
+      sobrenome: sobrenomeController.text,
+      cpf: cpfController.text,
+    );
+
+    if (isEditing) {
+      // Se estiver editando, chamar a função de editar com o ID correto
+      await _editarCliente(clientes[editingIndex].id, novoCliente);
+    } else {
+      // Se não estiver editando, chamar a função de incluir
+      await _incluirCliente(novoCliente);
+    }
+
+    // Limpar campos e recarregar lista de clientes
+    _limparCampos();
+    _carregarClientes();
+  }
+
+  void _mostrarSnackBar(String mensagem) {
+    final snackBar = SnackBar(
+      content: Text(mensagem),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
   void _limparCampos() {
-    // Restante do código...
+    nomeController.clear();
+    sobrenomeController.clear();
+    cpfController.clear();
+
+    // Resetar variáveis de edição
+    isEditing = false;
+    editingIndex = -1;
   }
 
   void _carregarClientes() async {

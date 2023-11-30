@@ -1,0 +1,7 @@
+Para rodar o projeto
+
+Instalar as dependencias com:
+npm install
+
+Rodar com:
+npm run start-dev
