@@ -60,7 +60,8 @@ class _ClientesScreenState extends State<ClientesScreen> {
                           IconButton(
                             icon: Icon(Icons.delete),
                             onPressed: () {
-                              _excluirCliente(cliente.id);
+                              _confirmarExclusaoCliente(cliente
+                                  .id); // Chamar o método de confirmaçãor
                             },
                           ),
                         ],
@@ -138,33 +139,32 @@ class _ClientesScreenState extends State<ClientesScreen> {
     }
   }
 
-//Tentei exibir uma alert para confirmar a exclusão, mas não funcionou
-  // Future<void> _confirmarExclusaoCliente(int id) async {
-  //   return showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text('Confirmação'),
-  //         content: Text('Tem certeza que deseja excluir esse cliente?'),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop(); // Fechar o diálogo de confirmação
-  //             },
-  //             child: Text('Cancelar'),
-  //           ),
-  //           TextButton(
-  //             onPressed: () async {
-  //               await _excluirCliente(id);
-  //               Navigator.of(context).pop(); // Fechar o diálogo de confirmação
-  //             },
-  //             child: Text('Confirmar'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
+  Future<void> _confirmarExclusaoCliente(int id) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmação'),
+          content: Text('Tem certeza que deseja excluir esse cliente?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fechar o diálogo de confirmação
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _excluirCliente(id);
+                Navigator.of(context).pop(); // Fechar o diálogo de confirmação
+              },
+              child: Text('Confirmar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void _mostrarDialogoIncluirEditarCliente(BuildContext context) {
     showDialog(
