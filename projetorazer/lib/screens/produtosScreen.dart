@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/classProduto.dart';
 import '../models/apiService.dart'; // Import ApiService
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ProdutosScreen extends StatefulWidget {
   const ProdutosScreen({Key? key});
@@ -11,105 +13,146 @@ class ProdutosScreen extends StatefulWidget {
 
 class _ProdutosScreenState extends State<ProdutosScreen> {
   List<Produto> produtos = [];
-  final ApiService apiService = ApiService('URL_DA_SUA_API');
+  final String baseUrl = 'http://localhost:3000';
+
+  TextEditingController descricaoController = TextEditingController();
+  bool isEditing = false;
+  int editingIndex = -1;
 
   @override
   void initState() {
     super.initState();
     _carregarProdutos();
+    print('Produtos: $produtos');
   }
 
   Future<void> _carregarProdutos() async {
     try {
-      final produtos = await apiService.fetchProdutos();
-      setState(() {
-        this.produtos = produtos;
-      });
+      final response = await http.get(Uri.parse('$baseUrl/produtos'));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> produtosData =
+            data['produtos']; // Acessar a lista de produtos
+
+        setState(() {
+          produtos =
+              produtosData.map((json) => Produto.fromJson(json)).toList();
+        });
+      } else {
+        print('Erro ao carregar produtos da API: ${response.statusCode}');
+      }
     } catch (e) {
-      // Handle error
       print('Erro ao carregar produtos: $e');
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Lista de Produtos'),
-      ),
-      body: ListView.builder(
-        itemCount: produtos.length,
-        itemBuilder: (context, index) {
-          final produto = produtos[index];
-          return ListTile(
-            title: Text(produto.descricao),
-            trailing: IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () => _excluirProduto(produto.id),
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _mostrarDialogoIncluirProduto(context);
-        },
-        child: Icon(Icons.add),
-      ),
-    );
-  }
-
-  Future<void> _mostrarDialogoIncluirProduto(BuildContext context) async {
-    final TextEditingController descricaoController = TextEditingController();
-
-    showDialog(
+  Future<void> _mostrarDialogoIncluirEditarProduto(BuildContext context) {
+    return showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Incluir Produto'),
+          title: Text(isEditing ? 'Editar Produto' : 'Adicionar Produto'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
+            children: [
               TextField(
                 controller: descricaoController,
                 decoration: InputDecoration(labelText: 'Descrição'),
               ),
             ],
           ),
-          actions: <Widget>[
+          actions: [
             TextButton(
-              child: Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
+                _limparCampos();
               },
+              child: Text('Cancelar'),
             ),
             TextButton(
-              child: Text('Salvar'),
               onPressed: () async {
-                final descricao = descricaoController.text;
-
-                if (descricao.isNotEmpty) {
-                  try {
-                    final novoProduto = Produto(
-                      id: DateTime.now().millisecondsSinceEpoch,
-                      descricao: descricao,
-                    );
-                    await apiService.criarProduto(novoProduto);
-                    _carregarProdutos(); // Atualiza a lista após a inclusão
-                    Navigator.of(context).pop();
-                  } catch (e) {
-                    // Handle error
-                    print('Erro ao criar produto: $e');
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content:
-                          Text('Por favor, preencha a descrição do produto.'),
-                    ),
-                  );
-                }
+                isEditing ? await _editarProduto() : await _adicionarProduto();
+                Navigator.of(context).pop();
               },
+              child: Text('Salvar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _adicionarProduto() async {
+    try {
+      final novaDescricao = descricaoController.text;
+      if (novaDescricao.isNotEmpty) {
+        final novoProduto = Produto(id: 0, descricao: novaDescricao);
+        final response = await http.post(
+          Uri.parse('$baseUrl/incluirProduto'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(novoProduto.toJson()),
+        );
+
+        if (response.statusCode == 201) {
+          _carregarProdutos();
+          _mostrarSnackBar('Produto adicionado com sucesso');
+        } else {
+          print('Erro ao adicionar produto: ${response.statusCode}');
+        }
+      } else {
+        _mostrarSnackBar('Por favor, preencha a descrição do produto.');
+      }
+    } catch (e) {
+      print('Erro ao adicionar produto: $e');
+    }
+  }
+
+  Future<void> _editarProduto() async {
+    try {
+      final novaDescricao = descricaoController.text;
+      if (novaDescricao.isNotEmpty) {
+        final produtoEditado =
+            Produto(id: produtos[editingIndex].id, descricao: novaDescricao);
+        final response = await http.put(
+          Uri.parse('$baseUrl/atualizarProduto/${produtoEditado.id}'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(produtoEditado.toJson()),
+        );
+
+        if (response.statusCode == 200) {
+          _carregarProdutos();
+          _mostrarSnackBar('Produto editado com sucesso');
+        } else {
+          print('Erro ao editar produto: ${response.statusCode}');
+        }
+      } else {
+        _mostrarSnackBar('Por favor, preencha a descrição do produto.');
+      }
+    } catch (e) {
+      print('Erro ao editar produto: $e');
+    }
+  }
+
+  Future<void> _confirmarExclusaoProduto(int id) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmação'),
+          content: Text('Tem certeza que deseja excluir este produto?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fechar o diálogo de confirmação
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _excluirProduto(id);
+                Navigator.of(context).pop(); // Fechar o diálogo de confirmação
+              },
+              child: Text('Confirmar'),
             ),
           ],
         );
@@ -119,11 +162,77 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
 
   Future<void> _excluirProduto(int id) async {
     try {
-      await apiService.excluirProduto(id);
-      _carregarProdutos(); // Atualiza a lista após a exclusão
+      final response =
+          await http.delete(Uri.parse('$baseUrl/excluirProduto/$id'));
+      if (response.statusCode == 204) {
+        _carregarProdutos();
+        _mostrarSnackBar('Produto excluído com sucesso');
+      } else {
+        print('Erro ao excluir produto: ${response.statusCode}');
+      }
     } catch (e) {
-      // Handle error
       print('Erro ao excluir produto: $e');
     }
+  }
+
+  void _mostrarSnackBar(String mensagem) {
+    final snackBar = SnackBar(
+      content: Text(mensagem),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  void _limparCampos() {
+    descricaoController.clear();
+    isEditing = false;
+    editingIndex = -1;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Lista de Produtos'),
+      ),
+      body: produtos.isEmpty
+          ? Center(child: Text('Nenhum produto encontrado.'))
+          : ListView.builder(
+              itemCount: produtos.length,
+              itemBuilder: (context, index) {
+                final produto = produtos[index];
+                return ListTile(
+                  title: Text(produto.descricao),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () {
+                          descricaoController.text = produto.descricao;
+                          setState(() {
+                            isEditing = true;
+                            editingIndex = index;
+                          });
+                          _mostrarDialogoIncluirEditarProduto(context);
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          _confirmarExclusaoProduto(produto.id);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _mostrarDialogoIncluirEditarProduto(context);
+        },
+        child: Icon(Icons.add),
+      ),
+    );
   }
 }
