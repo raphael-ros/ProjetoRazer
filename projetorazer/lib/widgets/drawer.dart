@@ -3,6 +3,7 @@ import 'package:projetorazer/screens/produtosScreen.dart';
 import 'package:projetorazer/screens/clientesScreen.dart';
 import 'package:projetorazer/screens/produtosScreen.dart';
 import 'package:projetorazer/screens/vendasScreen.dart';
+import 'package:projetorazer/screens/pedidosScreen.dart';
 
 class AppDrawer extends StatelessWidget {
   Widget _createHeader() {
@@ -83,6 +84,20 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
+
+          _createDrawerItem(
+            icon: Icons.list_alt,
+            text: 'Pedidos',
+            onTap: () {
+              // Implemente a navegação para a tela de pedidos aqui.
+              Navigator.pop(context); // Fecha o Drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PedidosScreen()),
+              );
+            },
+          ),
+
           // Adicione mais itens de menu conforme necessário.
         ],
       ),
