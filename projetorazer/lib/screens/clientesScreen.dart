@@ -140,30 +140,30 @@ class _ClientesScreenState extends State<ClientesScreen> {
   }
 
   Future<void> _confirmarExclusaoCliente(int id) async {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirmação'),
-          content: Text('Tem certeza que deseja excluir esse cliente?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Fechar o diálogo de confirmação
-              },
-              child: Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await _excluirCliente(id);
-                Navigator.of(context).pop(); // Fechar o diálogo de confirmação
-              },
-              child: Text('Confirmar'),
-            ),
-          ],
-        );
-      },
-    );
+    try {
+      final response =
+          await http.delete(Uri.parse('$baseUrl/excluirCliente/$id'));
+
+      if (response.statusCode == 200) {
+        // Se a exclusão for bem-sucedida, mostrar mensagem de confirmação
+        _mostrarSnackBar('Cliente excluído com sucesso');
+
+        // Recarregar lista de clientes após a exclusão
+        _carregarClientes();
+      } else {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        final String errorMessage =
+            responseData['message'] ?? 'Erro desconhecido';
+
+        // Se a exclusão falhar, mostrar mensagem de erro
+        _mostrarSnackBar('Erro ao excluir cliente: $errorMessage');
+      }
+    } catch (e) {
+      print('Erro ao excluir cliente: $e');
+      // Tratar erro, se necessário
+      _mostrarSnackBar(
+          'Erro ao excluir cliente. Verifique a conexão e tente novamente.');
+    }
   }
 
   void _mostrarDialogoIncluirEditarCliente(BuildContext context) {
