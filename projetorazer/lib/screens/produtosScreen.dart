@@ -13,7 +13,7 @@ class ProdutosScreen extends StatefulWidget {
 
 class _ProdutosScreenState extends State<ProdutosScreen> {
   List<Produto> produtos = [];
-  final String baseUrl = 'http://localhost:3000';
+  final String baseUrl = 'http://infopguaifpr.com.br:3052';
 
   TextEditingController descricaoController = TextEditingController();
   bool isEditing = false;

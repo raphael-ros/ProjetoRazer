@@ -12,6 +12,8 @@ export const listarPedidos = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Erro ao listar pedidos' });
     }
 };
+
+
 export const incluirPedido = async (req: Request, res: Response) => {
     try {
         const { data, id_cliente } = req.body;

@@ -23,7 +23,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
   int editingIndex = -1;
 
   final String baseUrl =
-      'http://localhost:3000'; // Ajuste a URL conforme necessário
+      'http://infopguaifpr.com.br:3052'; // Ajuste a URL conforme necessário
 
   @override
   void initState() {

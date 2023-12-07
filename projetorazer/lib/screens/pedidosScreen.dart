@@ -14,7 +14,7 @@ class PedidosScreen extends StatefulWidget {
 
 class _PedidosScreenState extends State<PedidosScreen> {
   List<Pedido> pedidos = [];
-  final String baseUrl = 'http://localhost:3000';
+  final String baseUrl = 'http://infopguaifpr.com.br:3052';
 
   // TextEditingController dataController = TextEditingController();
   int? selectedClientId; // Variável para armazenar o cliente selecionado
