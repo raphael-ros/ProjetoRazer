@@ -177,8 +177,20 @@ class _PedidosScreenState extends State<PedidosScreen> {
                     children: [
                       Text('Data: ${dateFormat.format(pedido.data)}'),
                       Text(
-                          'Cliente: ${pedido.cliente.nome} ${pedido.cliente.sobrenome}'),
-                      // Adicione mais informações do pedido conforme necessário
+                        'Cliente: ${pedido.cliente.nome} ${pedido.cliente.sobrenome}',
+                      ),
+                      if (pedido.itensDoPedido != null &&
+                          pedido.itensDoPedido!.isNotEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Itens do Pedido:'),
+                            for (var item in pedido.itensDoPedido!)
+                              Text(
+                                '- ${item.qtdade}x ${item.produto.descricao}',
+                              ),
+                          ],
+                        ),
                     ],
                   ),
                 );

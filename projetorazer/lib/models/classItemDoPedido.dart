@@ -1,23 +1,29 @@
+import 'package:projetorazer/models/classProduto.dart';
+
 class ItemDoPedido {
-  int id;
-  int idProduto;
-  int idPedido;
-  int quantidade;
+  final int id;
+  final int qtdade;
+  final Produto produto;
 
   ItemDoPedido({
     required this.id,
-    required this.idProduto,
-    required this.idPedido,
-    required this.quantidade,
+    required this.qtdade,
+    required this.produto,
   });
 
-  // Método para criar uma instância de ItemDoPedido a partir de um mapa
-  factory ItemDoPedido.fromMap(Map<String, dynamic> map) {
+  factory ItemDoPedido.fromJson(Map<String, dynamic> json) {
     return ItemDoPedido(
-      id: map['id'],
-      idProduto: map['id_produto'],
-      idPedido: map['id_pedido'],
-      quantidade: map['qtdade'],
+      id: json['id'] as int,
+      qtdade: json['qtdade'] as int,
+      produto: Produto.fromJson(json['produto']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'qtdade': qtdade,
+      'produto': produto.toJson(),
+    };
   }
 }
