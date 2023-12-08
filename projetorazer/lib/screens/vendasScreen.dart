@@ -97,11 +97,6 @@ class _VendasScreenState extends State<VendasScreen> {
 
   Future<void> _carregarItensDoPedido(int? pedidoId) async {
     try {
-      // Limpar a lista de itens ao iniciar o carregamento de um novo pedido
-      setState(() {
-        itensDoPedidoSelecionado = [];
-      });
-
       if (pedidoId != null) {
         final response = await http.get(
           Uri.parse('http://infopguaifpr.com.br:3052/itensDoPedido/$pedidoId'),
@@ -144,25 +139,6 @@ class _VendasScreenState extends State<VendasScreen> {
             print(
                 'Erro ao carregar itens do pedido. Resposta inesperada: $data');
           }
-        } else if (response.statusCode == 404) {
-          // Mostra uma mensagem indicando que o pedido não foi encontrado
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Pedido Vazio'),
-                content: Text('O pedido selecionado ainda não tem produtos.'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
         } else {
           print(
               'Erro ao carregar itens do pedido. Status code: ${response.statusCode}');
