@@ -79,6 +79,9 @@ class _PedidosScreenState extends State<PedidosScreen> {
         final Map<String, dynamic> data = json.decode(response.body);
         final List<dynamic> pedidosData = data['pedidos'];
 
+        print(
+            'Dados recebidos da API: $pedidosData'); // Adicione esta linha para debugar
+
         setState(() {
           pedidos = pedidosData.map((json) => Pedido.fromJson(json)).toList();
         });
@@ -102,9 +105,15 @@ class _PedidosScreenState extends State<PedidosScreen> {
         return;
       }
 
+      // Criar um objeto Cliente associado ao pedido
+      final clienteSelecionado =
+          clientes.firstWhere((cliente) => cliente.id == selectedClientId);
+
+      // Criar o novo pedido com o cliente associado
       final novoPedido = Pedido.create(
         data: selectedDate!,
         idCliente: selectedClientId!,
+        cliente: clienteSelecionado,
       );
 
       final response = await http.post(
@@ -161,9 +170,17 @@ class _PedidosScreenState extends State<PedidosScreen> {
               itemBuilder: (context, index) {
                 final pedido = pedidos[index];
                 return ListTile(
+                  leading: Icon(Icons.shopping_cart),
                   title: Text('Pedido #${pedido.id}'),
-                  subtitle: Text('Data: ${dateFormat.format(pedido.data)}'),
-                  // Adicione mais informações do pedido conforme necessário
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Data: ${dateFormat.format(pedido.data)}'),
+                      Text(
+                          'Cliente: ${pedido.cliente.nome} ${pedido.cliente.sobrenome}'),
+                      // Adicione mais informações do pedido conforme necessário
+                    ],
+                  ),
                 );
               },
             ),
