@@ -2,12 +2,14 @@ import 'package:projetorazer/models/classCliente.dart';
 import 'package:projetorazer/models/classItemDoPedido.dart';
 
 class Pedido {
+  //Atributos da classe pedido
   final int id;
   final DateTime data;
   final int idCliente;
   final Cliente cliente;
   final List<ItemDoPedido>? itensDoPedido;
 
+  //Construtor da classe Pedido
   Pedido({
     required this.id,
     required this.data,
@@ -16,6 +18,7 @@ class Pedido {
     this.itensDoPedido,
   });
 
+  // Método de fábrica para criar uma instância de Pedido a partir de um mapa (JSON).
   factory Pedido.fromJson(Map<String, dynamic> json) {
     final List<dynamic>? itensDoPedidoJson = json['itensDoPedido'];
     final List<ItemDoPedido> itensDoPedido = (itensDoPedidoJson ?? [])
@@ -31,6 +34,7 @@ class Pedido {
     );
   }
 
+// Método para converter o objeto Cliente em um mapa (JSON).
   Map<String, dynamic> toJson() {
     return {
       'id': id,

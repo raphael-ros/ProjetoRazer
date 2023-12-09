@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/classProduto.dart';
-import '../models/apiService.dart'; // Import ApiService
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -14,7 +13,6 @@ class ProdutosScreen extends StatefulWidget {
 class _ProdutosScreenState extends State<ProdutosScreen> {
   List<Produto> produtos = [];
   final String baseUrl = 'http://infopguaifpr.com.br:3052';
-
   TextEditingController descricaoController = TextEditingController();
   bool isEditing = false;
   int editingIndex = -1;
@@ -26,6 +24,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
     print('Produtos: $produtos');
   }
 
+  // Função para carregar produtos da API
   Future<void> _carregarProdutos() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/produtos'));
@@ -46,6 +45,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
     }
   }
 
+  // Função para exibir diálogo de inclusão/editação de produto
   Future<void> _mostrarDialogoIncluirEditarProduto(BuildContext context) {
     return showDialog(
       context: context,
@@ -82,6 +82,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
     );
   }
 
+  // Função para adicionar novo produto
   Future<void> _adicionarProduto() async {
     try {
       final novaDescricao = descricaoController.text;
@@ -107,6 +108,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
     }
   }
 
+  // Função para editar produto existente
   Future<void> _editarProduto() async {
     try {
       final novaDescricao = descricaoController.text;
@@ -133,6 +135,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
     }
   }
 
+  // Função para exibir diálogo de confirmação de exclusão de produto
   Future<void> _confirmarExclusaoProduto(int id) async {
     return showDialog(
       context: context,
@@ -160,6 +163,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
     );
   }
 
+  // Função para excluir produto
   Future<void> _excluirProduto(int id) async {
     try {
       final response =
@@ -175,6 +179,7 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
     }
   }
 
+  // Função para exibir Snackbar na parte inferior da tela
   void _mostrarSnackBar(String mensagem) {
     final snackBar = SnackBar(
       content: Text(mensagem),
@@ -182,12 +187,14 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  // Função para limpar campos e variáveis de edição
   void _limparCampos() {
     descricaoController.clear();
     isEditing = false;
     editingIndex = -1;
   }
 
+  // Construção da tela
   @override
   Widget build(BuildContext context) {
     return Scaffold(
