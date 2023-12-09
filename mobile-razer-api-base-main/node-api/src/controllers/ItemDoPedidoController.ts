@@ -26,7 +26,11 @@ export const incluirItemDoPedido = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'Pedido ou Produto não encontrado' });
         }
 
-        const novoItemDoPedido = await ItemDoPedido.create({ id_pedido, id_produto, qtdade });
+        const novoItemDoPedido = await ItemDoPedido.create({
+            id_pedido: parseInt(id_pedido),
+            id_produto: parseInt(id_produto),
+            qtdade: parseInt(qtdade),
+        });
         res.status(201).json(novoItemDoPedido);
     } catch (error) {
         console.error('Erro ao incluir item do pedido:', error);

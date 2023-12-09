@@ -1,0 +1,55 @@
+### Trabalho de Desenvolvimento Ágil de Software
+
+### Disciplina: Mobile
+
+### Professor: Razer Montano
+
+Aqui está um exemplo de telas:
+
+![Adicionar Produto](/images/adicionar-produtos.jpeg)
+![Adicionar Produto](/images/dashboard.jpeg)
+![Adicionar Produto](/images/detalhes-pedido.jpeg)
+![Adicionar Produto](/images/drawer.jpeg)
+![Adicionar Produto](/images/tela-pedidos.jpeg)
+
+## Como Usar
+
+Siga as instruções abaixo para começar a usar o projeto.
+
+1. [Pré-requisitos](#pré-requisitos)
+2. [Instalação](#instalação)
+3. [Execução](#execução)
+4. [Exemplos](#exemplos)
+
+### Pré-requisitos
+
+- [Node.js] instalado
+- [Flutter]instalado
+
+### Instalação
+
+1. Execução Flutter:
+
+   ```bash
+   flutter run
+
+   ```
+
+2. Execução Node:
+   *navega até a pasta node-api
+   *Adicionar os dados do seu banco no arquivo .env (usar o .env exemple e excluir a parte do exemple)
+
+   ```bash
+   npm install
+   npm run start-dev
+   ```
+
+### Contribuição
+
+Agradecemos a todas as pessoas maravilhosas que contribuíram para este projeto!
+
+- [@Raphael de Oliveira Silva](https://github.com/raphael-ros)
+- [@Luccas Kayure Crisanto](https://github.com/Kayure)
+- [@Acácia Cabral de Lima](https://github.com/Kayure)
+- [@Jeferson Pacheco Thimoteo](https://github.com/Kayure)
+- [@Guilherme Guimarães](https://github.com/ggGuima)

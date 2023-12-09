@@ -2,15 +2,13 @@ CREATE TABLE clientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255),
     sobrenome VARCHAR(255),
-    cpf VARCHAR(14)
+    cpf VARCHAR(14) UNIQUE
 );
 
 CREATE TABLE produtos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     descricao VARCHAR(255)
 );
-
-
 
 CREATE TABLE pedidos (
     id INT AUTO_INCREMENT PRIMARY KEY,

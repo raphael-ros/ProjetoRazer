@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:projetorazer/screens/produtosScreen.dart';
 import 'package:projetorazer/screens/clientesScreen.dart';
-import 'package:projetorazer/screens/produtosScreen.dart';
-import 'package:projetorazer/screens/vendasScreen.dart';
 import 'package:projetorazer/screens/pedidosScreen.dart';
 
+// Widget para representar o Drawer da aplicação
 class AppDrawer extends StatelessWidget {
+  // Cria o cabeçalho do Drawer com o nome da aplicação
   Widget _createHeader() {
     return DrawerHeader(
       decoration: BoxDecoration(
         color: Colors.blue,
       ),
       child: Text(
-        'Vendinha do Razer',
+        'Vendinha do Lyures',
         style: TextStyle(
           color: Colors.white,
           fontSize: 24,
@@ -21,6 +21,7 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
+  // Cria um item do Drawer com ícone, texto e ação ao ser tocado
   Widget _createDrawerItem({
     required IconData icon,
     required String text,
@@ -35,25 +36,26 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Retorna o Drawer com uma lista de itens
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
           _createHeader(),
+          // Item do Drawer para a Página Inicial
           _createDrawerItem(
             icon: Icons.home,
             text: 'Página Inicial',
             onTap: () {
-              // Implemente a navegação para a página inicial aqui.
               Navigator.pop(context); // Fecha o Drawer
-              // Adicione aqui a lógica para a página inicial, se necessário.
+              // Adicione a lógica de navegação para a página inicial aqui, se necessário.
             },
           ),
+          // Item do Drawer para a tela de Clientes
           _createDrawerItem(
             icon: Icons.people,
             text: 'Clientes',
             onTap: () {
-              // Implemente a navegação para a tela de clientes aqui.
               Navigator.pop(context); // Fecha o Drawer
               Navigator.push(
                 context,
@@ -61,6 +63,7 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
+          // Item do Drawer para a tela de Produtos
           _createDrawerItem(
             icon: Icons.shopping_cart,
             text: 'Produtos',
@@ -72,24 +75,11 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
-          _createDrawerItem(
-            icon: Icons.attach_money,
-            text: 'Vendas',
-            onTap: () {
-              // Implemente a navegação para a tela de vendas aqui.
-              Navigator.pop(context); // Fecha o Drawer
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => VendasScreen()),
-              );
-            },
-          ),
-
+          // Item do Drawer para a tela de Pedidos
           _createDrawerItem(
             icon: Icons.list_alt,
             text: 'Pedidos',
             onTap: () {
-              // Implemente a navegação para a tela de pedidos aqui.
               Navigator.pop(context); // Fecha o Drawer
               Navigator.push(
                 context,
@@ -97,8 +87,7 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
-
-          // Adicione mais itens de menu conforme necessário.
+          // Adicione mais itens do menu conforme necessário.
         ],
       ),
     );

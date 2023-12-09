@@ -1,11 +1,15 @@
+// Agora, vamos corrigir a associação no modelo Pedido
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../instances/mysql';
-import { Cliente } from './Cliente';
+import { Cliente, ClienteInstance } from './Cliente';
+import { ItemDoPedido, ItemDoPedidoInstance } from './ItemDoPedido';
 
 export interface PedidoInstance extends Model {
     id: number;
     data: Date;
     id_cliente: number;
+    Cliente: ClienteInstance;
+    ItensDoPedido: ItemDoPedidoInstance[];
 }
 
 export const Pedido = sequelize.define<PedidoInstance>('Pedido', {
@@ -21,7 +25,7 @@ export const Pedido = sequelize.define<PedidoInstance>('Pedido', {
         type: DataTypes.INTEGER,
         references: {
             model: Cliente,
-            key: 'id_cliente'
+            key: 'id'
         }
     },
 }, {
@@ -29,3 +33,7 @@ export const Pedido = sequelize.define<PedidoInstance>('Pedido', {
     timestamps: false
 });
 
+// Defina a associação corretamente
+Pedido.belongsTo(Cliente, { foreignKey: 'id_cliente' });
+Pedido.hasMany(ItemDoPedido, { foreignKey: 'id_pedido' });
+Pedido.hasMany(ItemDoPedido, { foreignKey: 'id_pedido', as: 'ItensDoPedido' });

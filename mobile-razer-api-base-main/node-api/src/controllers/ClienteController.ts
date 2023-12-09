@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Produto } from '../models/Produto';
 import { Cliente } from '../models/Cliente';
 import { Pedido } from '../models/Pedido';
+import { Op } from 'sequelize';
 
 export const listarClientes = async (req: Request, res: Response) => {
     try {
@@ -59,6 +60,21 @@ export const atualizarCliente = async (req: Request, res: Response) => {
         const clienteId = parseInt(req.params.id, 10);
         const { nome, sobrenome, cpf } = req.body;
 
+        // Verificar se o CPF já está sendo usado por outro cliente
+        const cpfExistente = await Cliente.findOne({
+            where: {
+                cpf,
+                id: {
+                    [Op.not]: clienteId // Garante que não estamos comparando com o mesmo cliente
+                }
+            }
+        });
+
+        if (cpfExistente) {
+            res.status(400).json({ message: 'CPF já está sendo usado por outro cliente' });
+            return;
+        }
+
         const cliente = await Cliente.findByPk(clienteId);
 
         if (cliente) {
@@ -76,6 +92,15 @@ export const atualizarCliente = async (req: Request, res: Response) => {
 export const incluirCliente = async (req: Request, res: Response) => {
     try {
         const { nome, sobrenome, cpf } = req.body;
+
+        // Verifica se o CPF já existe no banco de dados
+        const clienteExistente = await Cliente.findOne({ where: { cpf } });
+
+        if (clienteExistente) {
+            return res.status(400).json({ message: 'CPF já cadastrado' });
+        }
+
+        // Se o CPF não existir, cria um novo cliente
         const novoCliente = await Cliente.create({ nome, sobrenome, cpf });
 
         res.status(201).json(novoCliente);

@@ -11,7 +11,7 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dashboard'),
+        title: Text('Lyures Topzera'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

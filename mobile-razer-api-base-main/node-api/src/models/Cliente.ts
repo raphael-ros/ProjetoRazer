@@ -5,7 +5,7 @@ export interface ClienteInstance extends Model {
     id: number;
     nome: string;
     sobrenome: string;
-    cpf: string
+    cpf: string;
 }
 
 export const Cliente = sequelize.define<ClienteInstance>('Cliente', {
@@ -21,7 +21,8 @@ export const Cliente = sequelize.define<ClienteInstance>('Cliente', {
         type: DataTypes.STRING
     },
     cpf: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        unique: true
     },
 }, {
     tableName: 'clientes',
