@@ -113,7 +113,16 @@ class _PedidosScreenState extends State<PedidosScreen> {
 
       if (response.statusCode == 201) {
         print('Venda adicionada com sucesso');
-        // Lógica adicional após uma venda bem-sucedida, se necessário.
+
+        // Carrega os detalhes atualizados do pedido
+        await _carregarPedidos();
+
+        // Encontra o pedido atualizado
+        final Pedido pedidoAtualizado =
+            pedidos.firstWhere((pedido) => pedido.id == pedidoId);
+
+        // Exibe os detalhes do pedido atualizado
+        _mostrarDetalhesPedido(context, pedidoAtualizado);
       } else {
         print('Erro ao adicionar venda: ${response.statusCode}');
         // Lógica para tratar falhas na adição da venda
@@ -304,6 +313,7 @@ class _PedidosScreenState extends State<PedidosScreen> {
                   produtoSelecionado = selectedProductId;
                   _enviarVendaParaAPI(
                       pedidoId, produtoSelecionado, quantidadeDigitada);
+
                   Navigator.of(context).pop();
                 },
                 child: Text('Confirmar Venda'),
@@ -458,7 +468,7 @@ class _PedidosScreenState extends State<PedidosScreen> {
                 },
               );
             },
-            child: Icon(Icons.mode_edit_outline),
+            child: Icon(Icons.add),
             tooltip: 'Adicionar Pedido',
           ),
           SizedBox(height: 16),
